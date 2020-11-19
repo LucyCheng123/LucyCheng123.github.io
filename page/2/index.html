@@ -64,6 +64,46 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-搭建遇到问题" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/11/06/%E6%90%AD%E5%BB%BA%E9%81%87%E5%88%B0%E9%97%AE%E9%A2%98/" class="article-date">
+  <time datetime="2020-11-06T01:43:08.486Z" itemprop="datePublished">2020-11-06</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>搭建遇到问题</p>
+<p>Q1:本地hexo s都没问题，远程页面死活不更新。本地的public也正常生成，但是发现github上更新后的文件并没有post文件夹，about文件夹，index.html等。</p>
+<p>S1:各种反复hexo clean hexo g 都不行。还是直接删除了hexo文件夹下的隐藏文件.deploy_git。然后重新生成就可以了。mac显示隐藏文件.xxx格式的。直接快捷键cmd+shift+.</p>
+<p>Q2:theme下的某个主题死活git commit不上去，报changed not staged for commit 。add也add不上去。</p>
+<p>S2:要注意一个问题，在hexo主题网站找的主题模版，在其git repo上，还是不要git clone了。会自带.git(但其实有些并没有出现这个问题。。。。）在add的时候，会让添加一个子模块。省事的办法就是直接download下来放进去。</p>
+<p>Q3:明明ssh公钥都配置好了。SSH -T <a href="mailto:&#x67;&#105;&#x74;&#x40;&#103;&#105;&#116;&#104;&#x75;&#98;&#46;&#99;&#111;&#109;">&#x67;&#105;&#x74;&#x40;&#103;&#105;&#116;&#104;&#x75;&#98;&#46;&#99;&#111;&#109;</a>都没有问题。但是在hexo d的时候偏偏说权限禁止。</p>
+<p>S3:重新配置，在生成的时候，加上sudo ，以后在使用时候每一次都加上sudo。（mac系统）</p>
+<p>以下内容转自：<a target="_blank" rel="noopener" href="http://idealife.github.io/2015/10/02/Hexo%E9%83%A8%E7%BD%B2%E6%97%B6%E6%8F%90%E7%A4%BAFatal%EF%BC%9A-Could-not-read-from-remote-repository%E7%9A%84%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86/">http://idealife.github.io/2015/10/02/Hexo%E9%83%A8%E7%BD%B2%E6%97%B6%E6%8F%90%E7%A4%BAFatal%EF%BC%9A-Could-not-read-from-remote-repository%E7%9A%84%E9%97%AE%E9%A2%98%E5%A4%84%E7%90%86/</a></p>
+<p>第一次在Mac中配置好了hexo,发布的时候却一直提示：<br><code>Error: Permission denied (publickey). fatal: Could not read from remote repository.</code><br>分析这个错误提示大致可以推断出是公钥配置的问题引起的。</p>
+<p>但是github中我已经配置好了当前的公钥信息了，再次检查公钥。<br>0、github中公钥重新配置了一遍<br>1、git clone可以正确执行。<br>2、ssh -T <a href="mailto:&#x69;&#100;&#x65;&#x61;&#x6c;&#105;&#x66;&#101;&#x40;&#103;&#x69;&#x74;&#x68;&#x75;&#x62;&#46;&#99;&#x6f;&#x6d;">&#x69;&#100;&#x65;&#x61;&#x6c;&#105;&#x66;&#101;&#x40;&#103;&#x69;&#x74;&#x68;&#x75;&#x62;&#46;&#99;&#x6f;&#x6d;</a><br>也提示：Hi defnngj You’ve successfully authenticated, but GitHub does not provide shell access.<br>说明配置的公钥没有问题。<br>就是在执行sudo hexo deploy的时候报公钥问题。</p>
+<p>为什么要加sudo呢？<br>在执行hexo命令时，如果不提权，就会一直提示db.json文件的写权限的错误：<br><code>Unhandled rejection Error: EACCES: permission denied, open &#39;/Users/idealife/Developer/blog/db.json&#39; at Error (native)</code><br>所以进行了权限提升。<br>以前一直是在window环境中配置，对于权限的认识比较浅。突然意识到，就是sudo引起的问题。</p>
+<p>因为我生成公钥的命令是ssh-keygen -t rsa -C “<a href="mailto:&#x69;&#100;&#x65;&#x61;&#108;&#105;&#102;&#101;&#64;&#x67;&#x69;&#116;&#104;&#117;&#x62;&#x2e;&#99;&#111;&#x6d;">&#x69;&#100;&#x65;&#x61;&#108;&#105;&#102;&#101;&#64;&#x67;&#x69;&#116;&#104;&#117;&#x62;&#x2e;&#99;&#111;&#x6d;</a>”<br>没有加sudo，生成的公钥是当前用户的，路径是 /Users/idealife/.ssh。而sudo hexo deploy命令执行的时候应该会去读取的root用户的公钥，很显然root下还没有对应的公钥信息生成。</p>
+<p>随即立即验证这个推测。<br>1、为root生成publickey:sudo ssh-keygen -t rsa -C “<a href="mailto:&#x69;&#100;&#101;&#97;&#x6c;&#105;&#102;&#x65;&#64;&#103;&#105;&#x74;&#104;&#117;&#98;&#46;&#99;&#x6f;&#109;">&#x69;&#100;&#101;&#97;&#x6c;&#105;&#102;&#x65;&#64;&#103;&#105;&#x74;&#104;&#117;&#98;&#46;&#99;&#x6f;&#109;</a>”，对应路径为/var/root/.ssh<br>2、提取公钥信息并配置到github中。问题又来了，在UI界面中是无法访问到/var下的root文件夹的。我们可以通过sudo cat /var/root/.ssh/id_rsa.pub可以绕开这个问题。<br>3、执行sudo hexo deploy，部署成功！</p>
+<p>总结：在Linux或者UNIX环境中一定要注意权限问题</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/11/06/%E6%90%AD%E5%BB%BA%E9%81%87%E5%88%B0%E9%97%AE%E9%A2%98/" data-id="ckh5lhp3r0003h6s661xx11bu" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-测试6" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/11/06/%E6%B5%8B%E8%AF%956/" class="article-date">
@@ -376,6 +416,10 @@
       <ul>
         
           <li>
+            <a href="/2020/11/19/20201119_Reading/">(no title)</a>
+          </li>
+        
+          <li>
             <a href="/2020/11/18/20201118_Reading/">(no title)</a>
           </li>
         
@@ -389,10 +433,6 @@
         
           <li>
             <a href="/2020/11/13/20201113_reading/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2020/11/12/Java8_Stream/">(no title)</a>
           </li>
         
       </ul>
